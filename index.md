@@ -4,7 +4,7 @@ title: "Kamlesh"
 ---
 
 
-<img class="profile-picture" src="http://localhost:4000/assets/img/logo.jpg"> My name is Kamlesh
+<img class="profile-picture" src="https://kamleshkc2002.github.io/assets/img/logo.jpg"> I am Kamlesh, and I am current a software developer at Amazon.com working on Alexa Entity Resolution and focusing on Third party Music Provider integrations. I love to explore and learn about new things.
 
 
 ---
@@ -58,4 +58,4 @@ Coming Soon
 
 ---
 
-[//]: # (<img style="width:350px;" src="/assets/img/wordcloud.svg"/>)
+<img style="width:350px;" src="/assets/img/wordcloud.svg"/>
