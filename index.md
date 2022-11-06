@@ -4,7 +4,7 @@ title: "Kamlesh's Personal Page"
 ---
 
 
-<img class="profile-picture" src="https://kamleshkc2002.github.io/assets/img/logo.jpg"> I am Kamlesh, and I am current a software developer at Amazon.com working on Alexa Entity Resolution and focusing on Third party Music Provider integrations. I love to explore and learn about new things.
+<img class="profile-picture" src="https://kamleshkc2002.github.io/assets/img/logo.jpg"> I am Kamlesh, and I am currently a software developer at [Amazon.com](http://www.amazon.com/) working on Alexa Entity Resolution and focusing on Third party Music Provider integrations. I love to explore and learn about new things.
 
 
 ---
@@ -25,9 +25,13 @@ Coming soon
 
 ---
 
-## Proficiencies
+## ⚡ Technologies
 
-Coming soon
+Talk to me about
+
+- Back-end development and deployments using Java and AWS
+- Robust full-stack system design implementation
+- Making the choice between Relational Database Management Systems and NoSql Databases
 
 ---
 
