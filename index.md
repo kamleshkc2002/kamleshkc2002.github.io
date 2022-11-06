@@ -23,6 +23,8 @@ title: "Kamlesh's Personal Page"
 
 Coming soon
 
+[...see all experiences](./work)
+
 ---
 
 ## ⚡ Technologies
@@ -38,6 +40,8 @@ Talk to me about
 ## 🏞️ Interests
 
 Coming Soon
+
+[...see all interests](./interests)
 
 ---
 
