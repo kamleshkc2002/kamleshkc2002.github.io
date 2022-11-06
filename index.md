@@ -9,7 +9,7 @@ title: "Kamlesh's Personal Page"
 
 ---
 
-## News
+## 📰 News
 
 11/05/2022: First commit   
 
@@ -19,7 +19,7 @@ title: "Kamlesh's Personal Page"
 
 
 
-## Work Experience
+## 🛠️ Work Experience
 
 Coming soon
 
@@ -35,19 +35,19 @@ Talk to me about
 
 ---
 
-## Interests
+## 🏞️ Interests
 
 Coming Soon
 
 ---
 
-## Software
+## 💻 Software
 
 Coming Soon
 
 ---
 
-## Useful Links
+## 🚀 Useful Links
 
 [//]: # ([Machine Learning System Resources]&#40;https://www.bodunhu.com/blog/posts/machine-learning-system-resources/&#41;  )
 
