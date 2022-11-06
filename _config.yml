@@ -1,5 +1,5 @@
 title: Kamlesh Kumar Chhetty
-logo: /assets/img/logo.jpg
+logo: assets/img/logo.jpg
 email: chhetty at proton dot me
 blank_title: true
 favicon: true
@@ -40,3 +40,7 @@ github: [metadata]
 cdn:
   jsdelivr:
     enabled: true
+
+website: https://kamleshkc2002.github.io
+basewebsite: /
+permalink: date
