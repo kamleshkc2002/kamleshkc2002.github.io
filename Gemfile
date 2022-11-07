@@ -5,8 +5,6 @@ source "https://rubygems.org"
 gem "jekyll-seo-tag"
 gem "jekyll-sitemap"
 gem "jekyll-remote-theme"
-gem "font-awesome-rails"
-gem 'jquery-rails'
 
 # https://github.com/jekyll/jekyll/issues/8523#issuecomment-751409319
 # When running locally, we run into the following error —
