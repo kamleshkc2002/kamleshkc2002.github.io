@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Personal vacation and flight planner">
+    <meta name="author" content="Kamlesh Chhetty">
+
+    <title>Vacation Planner | Kamlesh Chhetty</title>
+
+    <link rel="stylesheet" href="/css/bootstrap.min.css" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,700,800|Merriweather:300,400,700" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css" type="text/css">
+    <link rel="stylesheet" href="/css/main.css" type="text/css">
+    <link rel="stylesheet" href="/css/vacation-planner.css" type="text/css">
+</head>
+
+<body class="planner-page" id="page-top">
+    <nav class="navbar navbar-default navbar-fixed-top planner-nav">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#planner-navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/">Kamlesh Chhetty</a>
+            </div>
+
+            <div class="collapse navbar-collapse" id="planner-navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li><a href="/#services">Services</a></li>
+                    <li><a href="/#portfolio">Portfolio</a></li>
+                    <li><a href="/#contact">Contact</a></li>
+                    <li class="active"><a href="/vacation-planner/">Vacation Planner</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="planner-shell">
+        <header class="planner-toolbar" aria-labelledby="planner-title">
+            <div>
+                <p class="planner-kicker">Personal tools</p>
+                <h1 id="planner-title">Vacation Planner</h1>
+            </div>
+            <div class="planner-toolbar-actions" aria-label="Planner actions">
+                <span class="save-state" id="saveState" aria-live="polite">
+                    <i class="fa fa-check-circle" aria-hidden="true"></i>
+                    Saved locally
+                </span>
+                <button class="planner-button planner-button-subtle" type="button" id="printPlanner" title="Print planner">
+                    <i class="fa fa-print" aria-hidden="true"></i>
+                    <span>Print</span>
+                </button>
+                <button class="planner-button planner-button-subtle" type="button" id="exportPlanner" title="Export planner data">
+                    <i class="fa fa-download" aria-hidden="true"></i>
+                    <span>Export</span>
+                </button>
+                <label class="planner-button planner-button-subtle" for="importPlanner" title="Import planner data">
+                    <i class="fa fa-upload" aria-hidden="true"></i>
+                    <span>Import</span>
+                </label>
+                <input class="sr-only" id="importPlanner" type="file" accept="application/json">
+            </div>
+        </header>
+
+        <section class="status-strip" aria-label="Current planner status">
+            <div>
+                <span class="status-label">Route</span>
+                <strong id="routeSummary">BOS to destination</strong>
+            </div>
+            <div>
+                <span class="status-label">Travel window</span>
+                <strong id="windowSummary">Choose dates</strong>
+            </div>
+            <div>
+                <span class="status-label">SkyTeam benchmark</span>
+                <strong id="benchmarkSummary">Add fares</strong>
+            </div>
+            <div>
+                <span class="status-label">Alerts</span>
+                <strong id="alertSummary">0 active</strong>
+            </div>
+        </section>
+
+        <div class="planner-grid">
+            <aside class="planner-panel planner-panel-settings" aria-labelledby="trip-settings-title">
+                <div class="panel-heading-row">
+                    <div>
+                        <p class="panel-kicker">Trip setup</p>
+                        <h2 id="trip-settings-title">Plan</h2>
+                    </div>
+                    <button class="icon-button" type="button" id="resetCurrentPlan" title="Reset current plan" aria-label="Reset current plan">
+                        <i class="fa fa-refresh" aria-hidden="true"></i>
+                    </button>
+                </div>
+
+                <form id="plannerForm" class="planner-form">
+                    <div class="form-field">
+                        <label for="tripName">Trip name</label>
+                        <input type="text" id="tripName" name="tripName" placeholder="Spring weekend">
+                    </div>
+
+                    <div class="form-field">
+                        <label for="destination">Destination</label>
+                        <input type="text" id="destination" name="destination" placeholder="City or airport">
+                    </div>
+
+                    <div class="split-fields">
+                        <div class="form-field">
+                            <label for="origin">Starting airport</label>
+                            <input type="text" id="origin" name="origin" maxlength="4" value="BOS">
+                        </div>
+                        <div class="form-field">
+                            <label for="budget">Target fare</label>
+                            <input type="number" id="budget" name="budget" min="0" step="1" placeholder="350">
+                        </div>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="tripStyle">Trip style</label>
+                        <select id="tripStyle" name="tripStyle">
+                            <option value="weekend_plus_one">Weekend + one day</option>
+                            <option value="long_weekend_plus_one">Long weekend + one day</option>
+                            <option value="custom">Custom dates</option>
+                        </select>
+                    </div>
+
+                    <div class="split-fields">
+                        <div class="form-field">
+                            <label for="anchorDate" id="anchorDateLabel">Weekend starts</label>
+                            <input type="date" id="anchorDate" name="anchorDate">
+                        </div>
+                        <div class="form-field custom-return-field" id="customReturnField">
+                            <label for="returnDate">Return by</label>
+                            <input type="date" id="returnDate" name="returnDate">
+                        </div>
+                    </div>
+
+                    <fieldset class="rule-fieldset">
+                        <legend>Flight branch</legend>
+                        <div class="segmented-control">
+                            <label>
+                                <input type="radio" name="branch" value="preferred" checked>
+                                <span><i class="fa fa-star" aria-hidden="true"></i> Preferred</span>
+                            </label>
+                            <label>
+                                <input type="radio" name="branch" value="alternate">
+                                <span><i class="fa fa-bolt" aria-hidden="true"></i> Alternate</span>
+                            </label>
+                        </div>
+                    </fieldset>
+
+                    <div class="rules-stack" id="branchRules" aria-live="polite"></div>
+
+                    <div class="check-grid" aria-label="Flight preferences">
+                        <label class="check-row">
+                            <input type="checkbox" id="pmDepart" name="pmDepart" checked>
+                            <span>PM departures</span>
+                        </label>
+                        <label class="check-row">
+                            <input type="checkbox" id="excludeBasic" name="excludeBasic" checked>
+                            <span>No basic economy</span>
+                        </label>
+                        <label class="check-row">
+                            <input type="checkbox" id="preferSkyTeam" name="preferSkyTeam" checked>
+                            <span>Prefer SkyTeam</span>
+                        </label>
+                        <label class="check-row">
+                            <span>Stops</span>
+                            <select id="maxStops" name="maxStops">
+                                <option value="0">Nonstop</option>
+                                <option value="1" selected>1 stop or less</option>
+                                <option value="2">2 stops or less</option>
+                            </select>
+                        </label>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="tripNotes">Notes</label>
+                        <textarea id="tripNotes" name="tripNotes" rows="4" placeholder="Hotels, PTO, restaurants, airport timing"></textarea>
+                    </div>
+
+                    <button class="planner-button planner-button-primary planner-button-wide" type="button" id="savePlan">
+                        <i class="fa fa-floppy-o" aria-hidden="true"></i>
+                        <span>Save Plan</span>
+                    </button>
+                </form>
+            </aside>
+
+            <section class="planner-panel planner-panel-main" aria-labelledby="flights-title">
+                <div class="panel-heading-row">
+                    <div>
+                        <p class="panel-kicker">Flight planner</p>
+                        <h2 id="flights-title">Candidates</h2>
+                    </div>
+                    <div class="compact-actions">
+                        <select id="candidateFilter" title="Filter candidates" aria-label="Filter candidates">
+                            <option value="all">All</option>
+                            <option value="preferred">Preferred</option>
+                            <option value="alternate">Alternate</option>
+                            <option value="compare">Compare</option>
+                            <option value="blocked">Blocked</option>
+                        </select>
+                        <select id="candidateSort" title="Sort candidates" aria-label="Sort candidates">
+                            <option value="score">Best fit</option>
+                            <option value="price">Lowest price</option>
+                            <option value="departure">Departure</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="recommendation-board" id="recommendationBoard" aria-live="polite">
+                    <div class="empty-recommendation">
+                        <i class="fa fa-plane" aria-hidden="true"></i>
+                        Add a fare to build the recommendation.
+                    </div>
+                </div>
+
+                <form id="candidateForm" class="candidate-form">
+                    <div class="candidate-form-grid">
+                        <div class="form-field">
+                            <label for="candidateAirline">Airline</label>
+                            <input type="text" id="candidateAirline" name="candidateAirline" placeholder="Delta">
+                        </div>
+                        <div class="form-field">
+                            <label for="candidateAirlineType">Type</label>
+                            <select id="candidateAirlineType" name="candidateAirlineType">
+                                <option value="skyteam">SkyTeam</option>
+                                <option value="other">Non-Frontier</option>
+                                <option value="frontier">Frontier</option>
+                            </select>
+                        </div>
+                        <div class="form-field">
+                            <label for="candidatePrice">Price</label>
+                            <input type="number" id="candidatePrice" name="candidatePrice" min="0" step="1" placeholder="320">
+                        </div>
+                        <div class="form-field">
+                            <label for="candidateStops">Stops</label>
+                            <select id="candidateStops" name="candidateStops">
+                                <option value="0">0</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                            </select>
+                        </div>
+                        <div class="form-field">
+                            <label for="candidateFareClass">Fare</label>
+                            <select id="candidateFareClass" name="candidateFareClass">
+                                <option value="main">Main cabin</option>
+                                <option value="basic">Basic economy</option>
+                                <option value="comfort">Comfort plus</option>
+                                <option value="premium">Premium</option>
+                            </select>
+                        </div>
+                        <div class="form-field">
+                            <label for="candidateDepartTime">Departure</label>
+                            <input type="time" id="candidateDepartTime" name="candidateDepartTime">
+                        </div>
+                        <div class="form-field">
+                            <label for="candidateReturnTime">Return</label>
+                            <input type="time" id="candidateReturnTime" name="candidateReturnTime">
+                        </div>
+                        <div class="form-field">
+                            <label for="candidateLink">Link</label>
+                            <input type="url" id="candidateLink" name="candidateLink" placeholder="https://">
+                        </div>
+                    </div>
+                    <div class="form-field">
+                        <label for="candidateNotes">Flight notes</label>
+                        <textarea id="candidateNotes" name="candidateNotes" rows="2" placeholder="Flight numbers, layover airport, booking notes"></textarea>
+                    </div>
+                    <div class="candidate-actions">
+                        <button class="planner-button planner-button-primary" type="submit">
+                            <i class="fa fa-plus" aria-hidden="true"></i>
+                            <span>Add Candidate</span>
+                        </button>
+                        <button class="planner-button planner-button-subtle" type="button" id="clearCandidates">
+                            <i class="fa fa-trash-o" aria-hidden="true"></i>
+                            <span>Clear Flights</span>
+                        </button>
+                    </div>
+                </form>
+
+                <div class="candidate-list" id="candidateList" aria-live="polite"></div>
+            </section>
+
+            <aside class="planner-sidebar">
+                <section class="planner-panel" aria-labelledby="alerts-title">
+                    <div class="panel-heading-row">
+                        <div>
+                            <p class="panel-kicker">Notifications</p>
+                            <h2 id="alerts-title">Alerts</h2>
+                        </div>
+                        <button class="icon-button" type="button" id="enableNotifications" title="Enable browser alerts" aria-label="Enable browser alerts">
+                            <i class="fa fa-bell-o" aria-hidden="true"></i>
+                        </button>
+                    </div>
+
+                    <div class="notification-state" id="notificationState">Browser alerts off</div>
+
+                    <form id="alertForm" class="planner-form">
+                        <div class="split-fields">
+                            <div class="form-field">
+                                <label for="alertName">Alert name</label>
+                                <input type="text" id="alertName" placeholder="Fare drop">
+                            </div>
+                            <div class="form-field">
+                                <label for="alertTarget">Target fare</label>
+                                <input type="number" id="alertTarget" min="0" step="1" placeholder="300">
+                            </div>
+                        </div>
+                        <div class="form-field">
+                            <label for="alertDue">Check by</label>
+                            <input type="datetime-local" id="alertDue">
+                        </div>
+                        <div class="candidate-actions">
+                            <button class="planner-button planner-button-primary" type="submit">
+                                <i class="fa fa-bell" aria-hidden="true"></i>
+                                <span>Add Alert</span>
+                            </button>
+                            <button class="planner-button planner-button-subtle" type="button" id="testNotification">
+                                <i class="fa fa-volume-up" aria-hidden="true"></i>
+                                <span>Test</span>
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="alert-banner" id="alertBanner" role="status" aria-live="polite"></div>
+                    <div class="side-list" id="alertList"></div>
+                </section>
+
+                <section class="planner-panel" aria-labelledby="saved-plans-title">
+                    <div class="panel-heading-row">
+                        <div>
+                            <p class="panel-kicker">Local storage</p>
+                            <h2 id="saved-plans-title">Saved Plans</h2>
+                        </div>
+                        <button class="icon-button" type="button" id="clearSavedPlans" title="Clear saved plans" aria-label="Clear saved plans">
+                            <i class="fa fa-archive" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                    <div class="side-list" id="savedPlansList"></div>
+                </section>
+            </aside>
+        </div>
+    </main>
+
+    <script src="/js/jquery.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/vacation-planner.js"></script>
+</body>
+
+</html>
