@@ -1,0 +1,31 @@
+js/vacation-planner.js
+  03e7ce3ccc417712 1-1193
+_includes/nav.html
+  03e7ce3ccc417712 27-28
+vacation-planner/index.html
+  03e7ce3ccc417712 1-357
+Gemfile
+  03e7ce3ccc417712 18
+css/vacation-planner.css
+  03e7ce3ccc417712 1-754
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "aef09c895e74a65c60edffded90917a55cfbe380",
+  "prompts": {
+    "03e7ce3ccc417712": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019df002-a446-7b11-a60d-463beb07d3b2",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Kamlesh Chhetty",
+      "messages": [],
+      "total_additions": 2309,
+      "total_deletions": 2,
+      "accepted_lines": 2308,
+      "overriden_lines": 0
+    }
+  }
+}
