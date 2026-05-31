@@ -54,12 +54,28 @@ export interface FlightSearchResponse {
   };
   candidates: FlightCandidate[];
   warnings: string[];
+  guardrails?: {
+    rateLimit?: {
+      limit: number;
+      remaining: number;
+      windowSeconds: number;
+    };
+    providerDailyLimit?: {
+      limit: number;
+      remaining: number;
+      date: string;
+    };
+  };
 }
 
 export interface Env {
   SEARCH_CACHE?: KVNamespace;
   FLIGHT_PROVIDER?: ProviderName;
   CACHE_TTL_SECONDS?: string;
+  RATE_LIMIT_MAX_REQUESTS?: string;
+  RATE_LIMIT_WINDOW_SECONDS?: string;
+  PROVIDER_DAILY_CALL_LIMIT?: string;
+  ENFORCE_PROVIDER_DAILY_LIMIT_FOR_MOCK?: string;
   ALLOWED_ORIGINS?: string;
   AMADEUS_CLIENT_ID?: string;
   AMADEUS_CLIENT_SECRET?: string;

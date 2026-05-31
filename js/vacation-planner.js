@@ -695,6 +695,18 @@
     }
 
     function getDiscoveryError(body, status) {
+        if (body && body.code === "RATE_LIMITED") {
+            return withRetryText("Too many searches from this browser. Please wait a bit and try again.", body.retryAfterSeconds);
+        }
+
+        if (body && body.code === "PROVIDER_DAILY_LIMIT_REACHED") {
+            return withRetryText("The daily flight-search quota has been reached. Try again tomorrow.", body.retryAfterSeconds);
+        }
+
+        if (body && body.code === "GUARDRAILS_UNAVAILABLE") {
+            return "Search is temporarily unavailable because quota guardrails are not configured.";
+        }
+
         if (body && body.error) {
             if (Array.isArray(body.details) && body.details.length) {
                 return body.error + " " + body.details.join(" ");
@@ -704,6 +716,20 @@
         }
 
         return "Search failed with status " + status;
+    }
+
+    function withRetryText(message, retryAfterSeconds) {
+        var seconds = Number(retryAfterSeconds || 0);
+
+        if (!seconds) {
+            return message;
+        }
+
+        if (seconds < 120) {
+            return message + " Retry in about " + Math.ceil(seconds) + " seconds.";
+        }
+
+        return message + " Retry in about " + Math.ceil(seconds / 60) + " minutes.";
     }
 
     function addCandidate(event) {

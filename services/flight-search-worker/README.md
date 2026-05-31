@@ -32,6 +32,18 @@ npm run deploy
 
 After deployment, set the vacation planner page's `planner-api-base` meta tag to the Worker URL.
 
+## Guardrails
+
+The Worker is public, so CORS is not treated as abuse protection. Cache hits return before any limit checks so repeated identical searches do not consume provider quota.
+
+Configured defaults:
+
+- `RATE_LIMIT_MAX_REQUESTS = "30"` uncached searches per client window.
+- `RATE_LIMIT_WINDOW_SECONDS = "60"` seconds per rate-limit window.
+- `PROVIDER_DAILY_CALL_LIMIT = "25"` real provider calls per UTC day.
+
+The daily provider cap applies when `FLIGHT_PROVIDER` is not `mock`. For local tests, `ENFORCE_PROVIDER_DAILY_LIMIT_FOR_MOCK = "true"` can force the mock provider through the same daily cap path.
+
 ## API
 
 ### `GET /health`
