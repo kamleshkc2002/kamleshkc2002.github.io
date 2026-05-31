@@ -1,8 +1,11 @@
-# Creative Theme for Jekyll
+# kamleshkc2002.github.io
 
-A Jekyll implementation of the [Creative Theme](http://startbootstrap.com/template-overviews/creative/) template by [Start Bootstrap](http://startbootstrap.com).
+Personal website for Kamlesh Chhetty, built with Jekyll and hosted on GitHub Pages.
 
-Creative is a one page Bootstrap theme for creatives, small businesses, and other multipurpose uses.
-The theme includes a number of rich features and plugins that you can use as a great boilerplate for your next Jekyll project! 
+## Local development
 
-See it live in action at <https://volny.github.io/creative-theme-jekyll/>
+```sh
+RBENV_VERSION=3.3.6 bundle exec jekyll serve --host 127.0.0.1 --port 4000
+```
+
+Then open <http://127.0.0.1:4000/>.
