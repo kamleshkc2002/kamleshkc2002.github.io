@@ -1,5 +1,13 @@
 import { createCacheKey, getCacheTtlSeconds, readCachedResponse, writeCachedResponse } from "./cache";
 import { corsHeaders, jsonResponse } from "./cors";
+import {
+  applyRateLimit,
+  checkProviderDailyLimit,
+  checkProviderGuardrailStore,
+  getGuardrailConfig,
+  guardrailErrorBody,
+  recordProviderCall
+} from "./guardrails";
 import { getProvider } from "./providers";
 import type { Env, ExecutionContextLike, FlightSearchResponse } from "./types";
 import { validateFlightSearchRequest } from "./validation";
@@ -57,6 +65,7 @@ async function searchFlights(request: Request, env: Env, ctx: ExecutionContextLi
   }
 
   const provider = getProvider(env);
+  const guardrailConfig = getGuardrailConfig(env);
   const ttlSeconds = getCacheTtlSeconds(env);
   const cacheKey = await createCacheKey(validation.request);
   const cached = await readCachedResponse(env, cacheKey);
@@ -71,8 +80,30 @@ async function searchFlights(request: Request, env: Env, ctx: ExecutionContextLi
     });
   }
 
+  const guardrailStoreError = await checkProviderGuardrailStore(env, provider.name);
+  if (guardrailStoreError) {
+    return jsonResponse(request, env, guardrailErrorBody(guardrailStoreError), { status: guardrailStoreError.status });
+  }
+
+  const rateLimit = await applyRateLimit(request, env, guardrailConfig);
+  if ("allowed" in rateLimit && !rateLimit.allowed) {
+    return jsonResponse(request, env, guardrailErrorBody(rateLimit), {
+      status: rateLimit.status,
+      headers: rateLimit.retryAfterSeconds ? { "Retry-After": String(rateLimit.retryAfterSeconds) } : undefined
+    });
+  }
+
+  const providerDailyLimit = await checkProviderDailyLimit(env, provider.name, guardrailConfig);
+  if ("allowed" in providerDailyLimit && !providerDailyLimit.allowed) {
+    return jsonResponse(request, env, guardrailErrorBody(providerDailyLimit), {
+      status: providerDailyLimit.status,
+      headers: providerDailyLimit.retryAfterSeconds ? { "Retry-After": String(providerDailyLimit.retryAfterSeconds) } : undefined
+    });
+  }
+
   try {
     const candidates = await provider.search(validation.request, env);
+    const providerCall = await recordProviderCall(env, provider.name, guardrailConfig);
     const response: FlightSearchResponse = {
       query: validation.request,
       generatedAt: new Date().toISOString(),
@@ -83,7 +114,12 @@ async function searchFlights(request: Request, env: Env, ctx: ExecutionContextLi
         ttlSeconds
       },
       candidates,
-      warnings: env.SEARCH_CACHE ? [] : ["Search cache is not configured."]
+      warnings: env.SEARCH_CACHE ? [] : ["Search cache is not configured."],
+      guardrails: {
+        ...rateLimit,
+        ...providerDailyLimit,
+        ...providerCall
+      }
     };
 
     const cacheWrite = writeCachedResponse(env, cacheKey, response, ttlSeconds);
