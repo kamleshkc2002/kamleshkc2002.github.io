@@ -136,6 +136,7 @@ p {
     display: inline-flex;
     height: 44px;
     justify-content: center;
+    position: relative;
     width: 44px;
 }
 
@@ -144,6 +145,29 @@ p {
     background: var(--text);
     border-color: var(--text);
     color: var(--surface);
+}
+
+.hero-actions a::after {
+    background: var(--text);
+    color: var(--surface);
+    content: attr(data-tooltip);
+    font-size: 12px;
+    font-weight: 700;
+    left: 50%;
+    opacity: 0;
+    padding: 5px 8px;
+    pointer-events: none;
+    position: absolute;
+    top: calc(100% + 10px);
+    transform: translateX(-50%) translateY(-4px);
+    transition: opacity .16s ease, transform .16s ease;
+    white-space: nowrap;
+}
+
+.hero-actions a:hover::after,
+.hero-actions a:focus::after {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
 }
 
 .hero-actions svg {
