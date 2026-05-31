@@ -1,33 +1,20 @@
-<!DOCTYPE html>
-<html lang="en">
+---
+layout: tool
+title: Vacation Planner
+description: Personal vacation and flight planner
+active_nav: vacation-planner
+body_class: planner-page
+main_class: planner-shell
+nav_class: planner-site-header
+brand_class: planner-brand
+links_class: planner-site-links
+font_awesome: true
+stylesheet: /css/vacation-planner.css
+script: /js/vacation-planner/main.js
+script_module: true
+planner_api_base: https://vacation-planner-flight-search.kamleshkc2002.workers.dev
+---
 
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Personal vacation and flight planner">
-    <meta name="author" content="Kamlesh Chhetty">
-    <meta name="planner-api-base" content="https://vacation-planner-flight-search.kamleshkc2002.workers.dev">
-
-    <title>Vacation Planner | Kamlesh Chhetty</title>
-
-    <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css" type="text/css">
-    <link rel="stylesheet" href="/css/main.css" type="text/css">
-    <link rel="stylesheet" href="/css/vacation-planner.css" type="text/css">
-</head>
-
-<body class="planner-page" id="page-top">
-    <nav class="planner-site-header" aria-label="Primary navigation">
-        <a class="planner-brand" href="/" aria-label="Kamlesh Chhetty home">KC</a>
-        <div class="planner-site-links">
-            <a href="/">Home</a>
-            <a href="/#projects">Projects</a>
-            <a href="/#contact">Contact</a>
-            <a class="is-active" href="/vacation-planner/" aria-current="page">Vacation Planner</a>
-        </div>
-    </nav>
-
-    <main class="planner-shell">
         <header class="planner-toolbar" aria-labelledby="planner-title">
             <div>
                 <p class="planner-kicker">Rules-based trip search</p>
@@ -369,9 +356,3 @@
                 </section>
             </aside>
         </div>
-    </main>
-
-    <script type="module" src="/js/vacation-planner/main.js"></script>
-</body>
-
-</html>
