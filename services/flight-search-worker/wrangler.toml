@@ -1,0 +1,13 @@
+name = "vacation-planner-flight-search"
+main = "src/index.ts"
+compatibility_date = "2026-05-31"
+
+[vars]
+FLIGHT_PROVIDER = "mock"
+CACHE_TTL_SECONDS = "21600"
+ALLOWED_ORIGINS = "http://127.0.0.1:4000,http://localhost:4000,https://kamleshkc2002.github.io"
+
+[[kv_namespaces]]
+binding = "SEARCH_CACHE"
+id = "replace-with-production-kv-id"
+preview_id = "replace-with-preview-kv-id"
