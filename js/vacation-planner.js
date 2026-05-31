@@ -94,7 +94,7 @@
             "routeSummary",
             "windowSummary",
             "benchmarkSummary",
-            "alertSummary",
+            "optionSummary",
             "recommendationBoard",
             "candidateForm",
             "candidateAirline",
@@ -263,20 +263,18 @@
     function renderStatusStrip() {
         var plan = state.currentPlan;
         var destination = plan.destination || "destination";
-        var activeAlerts = state.alerts.filter(function (alert) {
-            return alert.active !== false;
-        }).length;
+        var collected = state.candidates.length;
         var benchmark = getSkyTeamBenchmark();
 
         els.routeSummary.textContent = (plan.origin || "BOS") + " to " + destination;
         els.windowSummary.textContent = getTravelWindowText(plan);
         els.benchmarkSummary.textContent = benchmark ? formatMoney(benchmark.price) + " " + shortAirline(benchmark.airline) : "Add SkyTeam fare";
-        els.alertSummary.textContent = activeAlerts + " active";
+        els.optionSummary.textContent = collected + " collected";
     }
 
     function renderRecommendation() {
         if (!state.candidates.length) {
-            els.recommendationBoard.innerHTML = "<div class=\"empty-recommendation\"><i class=\"fa fa-plane\" aria-hidden=\"true\"></i>Add a fare to build the recommendation.</div>";
+            els.recommendationBoard.innerHTML = "<div class=\"empty-recommendation\"><i class=\"fa fa-search\" aria-hidden=\"true\"></i>Collect an option to build the recommendation.</div>";
             return;
         }
 
@@ -288,7 +286,7 @@
             .sort(compareCandidates("score"))[0];
 
         if (!best) {
-            els.recommendationBoard.innerHTML = "<div class=\"empty-recommendation\"><i class=\"fa fa-ban\" aria-hidden=\"true\"></i>No usable candidates yet.</div>";
+            els.recommendationBoard.innerHTML = "<div class=\"empty-recommendation\"><i class=\"fa fa-ban\" aria-hidden=\"true\"></i>No collected options pass the active rules yet.</div>";
             return;
         }
 
@@ -324,7 +322,7 @@
             .sort(compareCandidates(sort));
 
         if (!candidates.length) {
-            els.candidateList.innerHTML = "<div class=\"empty-list\">No candidates in this view.</div>";
+            els.candidateList.innerHTML = "<div class=\"empty-list\">No collected options in this view.</div>";
             return;
         }
 
@@ -378,11 +376,9 @@
 
         if (!activeAlerts.length) {
             els.alertList.innerHTML = "<div class=\"empty-list\">No active alerts.</div>";
-            els.alertSummary.textContent = "0 active";
             return;
         }
 
-        els.alertSummary.textContent = activeAlerts.length + " active";
         els.alertList.innerHTML = activeAlerts.map(function (alert) {
             var priceText = alert.targetPrice ? "Target " + formatMoney(alert.targetPrice) : "No fare target";
             var dateText = alert.dueAt ? "Check by " + formatDateTime(alert.dueAt) : "No due date";

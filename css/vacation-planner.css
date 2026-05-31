@@ -114,6 +114,13 @@
     letter-spacing: 0;
 }
 
+.planner-subtitle {
+    max-width: 680px;
+    margin: 10px 0 0;
+    color: #5e6673;
+    font-size: 16px;
+}
+
 .planner-toolbar-actions,
 .compact-actions,
 .candidate-actions,
@@ -477,6 +484,60 @@
     font-weight: 700;
 }
 
+.discovery-panel {
+    display: grid;
+    gap: 14px;
+    margin-bottom: 16px;
+    padding: 16px;
+    border: 1px solid #d9dee7;
+    background: #ffffff;
+}
+
+.discovery-panel h3,
+.form-section-heading h3 {
+    margin: 0;
+    color: #101318;
+    font-size: 17px;
+    font-weight: 800;
+}
+
+.discovery-panel p {
+    margin: 8px 0 0;
+    color: #5e6673;
+    font-size: 13px;
+}
+
+.source-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.source-card {
+    min-width: 0;
+    padding: 10px;
+    border: 1px solid #d9dee7;
+    background: #f8fafc;
+}
+
+.source-card span {
+    display: block;
+    margin-bottom: 4px;
+    color: #1d4ed8;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.source-card strong {
+    color: #101318;
+    font-size: 13px;
+}
+
+.form-section-heading {
+    margin-bottom: 4px;
+}
+
 .best-candidate {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
@@ -777,6 +838,10 @@
 
     .candidate-form-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .source-grid {
+        grid-template-columns: 1fr;
     }
 }
 
