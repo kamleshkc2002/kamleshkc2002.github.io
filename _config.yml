@@ -12,3 +12,6 @@ linkedin_username: kamleshchhetty
 
 # Build settings
 markdown: kramdown
+exclude:
+  - services/
+  - plans/
