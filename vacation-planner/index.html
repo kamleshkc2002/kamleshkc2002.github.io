@@ -10,34 +10,19 @@
 
     <title>Vacation Planner | Kamlesh Chhetty</title>
 
-    <link rel="stylesheet" href="/css/bootstrap.min.css" type="text/css">
-    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,700,800|Merriweather:300,400,700" rel="stylesheet" type="text/css">
     <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css" type="text/css">
     <link rel="stylesheet" href="/css/main.css" type="text/css">
     <link rel="stylesheet" href="/css/vacation-planner.css" type="text/css">
 </head>
 
 <body class="planner-page" id="page-top">
-    <nav class="navbar navbar-default navbar-fixed-top planner-nav">
-        <div class="container-fluid">
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#planner-navbar-collapse">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                <a class="navbar-brand" href="/">Kamlesh Chhetty</a>
-            </div>
-
-            <div class="collapse navbar-collapse" id="planner-navbar-collapse">
-                <ul class="nav navbar-nav navbar-right">
-                    <li><a href="/#services">Services</a></li>
-                    <li><a href="/#portfolio">Portfolio</a></li>
-                    <li><a href="/#contact">Contact</a></li>
-                    <li class="active"><a href="/vacation-planner/">Vacation Planner</a></li>
-                </ul>
-            </div>
+    <nav class="planner-site-header" aria-label="Primary navigation">
+        <a class="planner-brand" href="/" aria-label="Kamlesh Chhetty home">KC</a>
+        <div class="planner-site-links">
+            <a href="/">Home</a>
+            <a href="/#projects">Projects</a>
+            <a href="/#contact">Contact</a>
+            <a class="is-active" href="/vacation-planner/" aria-current="page">Vacation Planner</a>
         </div>
     </nav>
 
@@ -349,8 +334,6 @@
         </div>
     </main>
 
-    <script src="/js/jquery.js"></script>
-    <script src="/js/bootstrap.min.js"></script>
     <script src="/js/vacation-planner.js"></script>
 </body>
 
