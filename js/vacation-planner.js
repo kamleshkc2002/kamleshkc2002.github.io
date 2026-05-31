@@ -1564,12 +1564,12 @@
         var configured = queryValue || "";
         var meta = document.querySelector("meta[name='planner-api-base']");
 
-        if (!configured && meta) {
-            configured = meta.getAttribute("content") || "";
-        }
-
         if (!configured && (window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost")) {
             configured = LOCAL_DISCOVERY_API_BASE;
+        }
+
+        if (!configured && meta) {
+            configured = meta.getAttribute("content") || "";
         }
 
         return configured.replace(/\/$/, "");
