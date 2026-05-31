@@ -6,3 +6,6 @@ _site
 vendor
 Gemfile.lock
 .jekyll-cache
+node_modules/
+.wrangler/
+plans/

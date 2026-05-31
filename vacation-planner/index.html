@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Personal vacation and flight planner">
     <meta name="author" content="Kamlesh Chhetty">
+    <meta name="planner-api-base" content="">
 
     <title>Vacation Planner | Kamlesh Chhetty</title>
 
@@ -211,20 +212,29 @@
                     <div>
                         <p class="panel-kicker">Candidate discovery</p>
                         <h3 id="discovery-title">Search sources</h3>
-                        <p>Use the current destination, dates, and rules as the query. Automated source crawling is the next integration; for now, add or import promising options below.</p>
+                        <p>Use the current setup to collect flight options from the configured search API.</p>
                     </div>
-                    <div class="source-grid" aria-label="Planned search sources">
+                    <form id="discoveryForm" class="discovery-form">
+                        <div class="discovery-actions">
+                            <button class="planner-button planner-button-primary" type="submit" id="discoverFlights">
+                                <i class="fa fa-search" aria-hidden="true"></i>
+                                <span>Search Flights</span>
+                            </button>
+                            <div class="discovery-status" id="discoveryStatus" role="status" aria-live="polite"></div>
+                        </div>
+                    </form>
+                    <div class="source-grid" aria-label="Search sources">
                         <div class="source-card">
                             <span>Flights</span>
-                            <strong>Google Flights / airline sites</strong>
+                            <strong id="discoveryProvider">API provider</strong>
                         </div>
                         <div class="source-card">
-                            <span>Stays</span>
-                            <strong>Hotels and neighborhoods</strong>
+                            <span>Cache</span>
+                            <strong>On-demand results</strong>
                         </div>
                         <div class="source-card">
-                            <span>Constraints</span>
-                            <strong>Budget, timing, loyalty, stops</strong>
+                            <span>Rules</span>
+                            <strong>Local scoring engine</strong>
                         </div>
                     </div>
                 </section>

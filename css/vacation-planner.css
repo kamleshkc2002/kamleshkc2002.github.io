@@ -507,6 +507,47 @@
     font-size: 13px;
 }
 
+.discovery-form {
+    margin: 0;
+}
+
+.discovery-actions {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 10px;
+    align-items: center;
+}
+
+.discovery-status {
+    min-height: 36px;
+    padding: 9px 10px;
+    border: 1px solid #d9dee7;
+    background: #f8fafc;
+    color: #5e6673;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.discovery-status-success,
+.discovery-status-ready {
+    border-color: #cce7df;
+    background: #eef7f4;
+    color: #0f6e6b;
+}
+
+.discovery-status-busy {
+    border-color: #bcd3ff;
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+.discovery-status-error,
+.discovery-status-blocked {
+    border-color: #e8c8c7;
+    background: #f5e8e8;
+    color: #9e302b;
+}
+
 .source-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -864,6 +905,7 @@
     }
 
     .split-fields,
+    .discovery-actions,
     .candidate-form-grid,
     .best-candidate,
     .candidate-item {

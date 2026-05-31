@@ -3,8 +3,10 @@
 
     var STORAGE_KEY = "kamleshVacationPlanner.v1";
     var SAVE_DELAY = 180;
+    var LOCAL_DISCOVERY_API_BASE = "http://127.0.0.1:8787";
     var state = loadState();
     var saveTimer = null;
+    var discoveryInFlight = false;
 
     var els = {};
 
@@ -43,6 +45,14 @@
             candidates: [],
             alerts: [],
             savedPlans: [],
+            discovery: {
+                lastStatus: "",
+                lastKind: "idle",
+                lastRunAt: "",
+                lastCacheHit: false,
+                lastCount: 0,
+                provider: ""
+            },
             notificationsEnabled: false,
             updatedAt: ""
         };
@@ -63,6 +73,7 @@
                 candidates: Array.isArray(saved.candidates) ? saved.candidates : [],
                 alerts: Array.isArray(saved.alerts) ? saved.alerts : [],
                 savedPlans: Array.isArray(saved.savedPlans) ? saved.savedPlans : [],
+                discovery: Object.assign({}, base.discovery, saved.discovery || {}),
                 notificationsEnabled: Boolean(saved.notificationsEnabled),
                 updatedAt: saved.updatedAt || ""
             };
@@ -96,6 +107,10 @@
             "benchmarkSummary",
             "optionSummary",
             "recommendationBoard",
+            "discoveryForm",
+            "discoverFlights",
+            "discoveryStatus",
+            "discoveryProvider",
             "candidateForm",
             "candidateAirline",
             "candidateAirlineType",
@@ -156,6 +171,7 @@
 
         els.savePlan.addEventListener("click", saveCurrentPlan);
         els.resetCurrentPlan.addEventListener("click", resetCurrentPlan);
+        els.discoveryForm.addEventListener("submit", discoverFlights);
         els.candidateForm.addEventListener("submit", addCandidate);
         els.clearCandidates.addEventListener("click", clearCandidates);
         els.candidateFilter.addEventListener("change", renderCandidates);
@@ -218,6 +234,7 @@
 
     function handlePlannerChange() {
         readPlannerForm();
+        clearDiscoveryStatus();
         updateDateControls();
         renderAll();
         persistSoon();
@@ -241,6 +258,7 @@
     function renderAll() {
         renderBranchRules();
         renderStatusStrip();
+        renderDiscoveryStatus();
         renderRecommendation();
         renderCandidates();
         renderAlerts();
@@ -270,6 +288,26 @@
         els.windowSummary.textContent = getTravelWindowText(plan);
         els.benchmarkSummary.textContent = benchmark ? formatMoney(benchmark.price) + " " + shortAirline(benchmark.airline) : "Add SkyTeam fare";
         els.optionSummary.textContent = collected + " collected";
+    }
+
+    function renderDiscoveryStatus() {
+        var apiBase = getDiscoveryApiBase();
+        var discovery = state.discovery || defaultState().discovery;
+        var message = discovery.lastStatus;
+        var kind = discovery.lastKind || "idle";
+
+        if (discoveryInFlight) {
+            message = "Searching flight sources...";
+            kind = "busy";
+        } else if (!message) {
+            message = apiBase ? "Search API ready" : "Search API not configured";
+            kind = apiBase ? "ready" : "blocked";
+        }
+
+        els.discoveryStatus.className = "discovery-status discovery-status-" + kind;
+        els.discoveryStatus.textContent = message;
+        els.discoverFlights.disabled = discoveryInFlight || !apiBase;
+        els.discoveryProvider.textContent = discovery.provider ? formatProvider(discovery.provider) : (apiBase ? "Mock/local API" : "Not configured");
     }
 
     function renderRecommendation() {
@@ -339,6 +377,9 @@
             "Depart " + formatDepart(candidate.departTime),
             "Return " + formatDepart(candidate.returnTime)
         ];
+        if (candidate.sourceProvider) {
+            details.push(formatProvider(candidate.sourceProvider));
+        }
         var notes = candidate.notes ? "<div class=\"candidate-notes\">" + escapeHtml(candidate.notes) + "</div>" : "";
         var link = candidate.link
             ? "<a class=\"icon-button\" href=\"" + escapeAttribute(candidate.link) + "\" target=\"_blank\" rel=\"noopener\" title=\"Open fare\" aria-label=\"Open fare\"><i class=\"fa fa-external-link\" aria-hidden=\"true\"></i></a>"
@@ -450,6 +491,219 @@
 
         els.notificationState.className = "notification-state";
         els.notificationState.textContent = "Browser alerts off";
+    }
+
+    function discoverFlights(event) {
+        event.preventDefault();
+        readPlannerForm();
+
+        var apiBase = getDiscoveryApiBase();
+        var request = buildFlightSearchRequest();
+
+        if (!apiBase) {
+            setDiscoveryStatus("blocked", "Search API not configured");
+            return;
+        }
+
+        if (!request) {
+            setDiscoveryStatus("blocked", "Add a destination and travel date first");
+            return;
+        }
+
+        discoveryInFlight = true;
+        renderDiscoveryStatus();
+
+        window.fetch(apiBase + "/api/search/flights", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(request)
+        })
+            .then(function (response) {
+                return response.json().catch(function () {
+                    return {};
+                }).then(function (body) {
+                    if (!response.ok) {
+                        throw new Error(getDiscoveryError(body, response.status));
+                    }
+                    return body;
+                });
+            })
+            .then(function (body) {
+                var result = mergeDiscoveredCandidates(body.candidates || []);
+                var cacheText = body.cache && body.cache.hit ? "cache hit" : "fresh search";
+                var countText = result.added + " added" + (result.updated ? ", " + result.updated + " updated" : "");
+
+                state.discovery = {
+                    lastStatus: "Search complete: " + countText + " (" + cacheText + ")",
+                    lastKind: "success",
+                    lastRunAt: new Date().toISOString(),
+                    lastCacheHit: Boolean(body.cache && body.cache.hit),
+                    lastCount: Array.isArray(body.candidates) ? body.candidates.length : 0,
+                    provider: body.provider || ""
+                };
+
+                renderAll();
+                persistSoon();
+                checkAlerts(false);
+            })
+            .catch(function (error) {
+                setDiscoveryStatus("error", error.message || "Search failed");
+            })
+            .finally(function () {
+                discoveryInFlight = false;
+                renderDiscoveryStatus();
+            });
+    }
+
+    function buildFlightSearchRequest() {
+        var plan = state.currentPlan;
+        var windowDates = getTravelWindowDates(plan);
+
+        if (!plan.destination || !windowDates) {
+            return null;
+        }
+
+        return {
+            origin: cleanAirport(plan.origin || "BOS"),
+            destination: plan.destination.trim(),
+            travelWindow: windowDates,
+            passengers: 1,
+            budget: Number(plan.budget || 0) || undefined,
+            tripStyle: plan.tripStyle,
+            rules: {
+                branch: plan.branch || "preferred",
+                preferSkyTeam: Boolean(plan.preferSkyTeam),
+                excludeBasic: Boolean(plan.excludeBasic),
+                maxStops: getProfileMaxStops(plan),
+                pmDepart: Boolean(plan.pmDepart)
+            }
+        };
+    }
+
+    function getTravelWindowDates(plan) {
+        var start = parseLocalDate(plan.anchorDate);
+
+        if (!start) {
+            return null;
+        }
+
+        if (plan.tripStyle === "custom") {
+            var customEnd = parseLocalDate(plan.returnDate);
+            return {
+                startDate: toDateInputValue(start),
+                endDate: customEnd ? toDateInputValue(customEnd) : undefined
+            };
+        }
+
+        return {
+            startDate: toDateInputValue(addDays(start, -1)),
+            endDate: toDateInputValue(addDays(start, plan.tripStyle === "long_weekend_plus_one" ? 4 : 3))
+        };
+    }
+
+    function mergeDiscoveredCandidates(candidates) {
+        var result = { added: 0, updated: 0 };
+        var indexByKey = {};
+
+        state.candidates.forEach(function (candidate, index) {
+            indexByKey[getCandidateDedupeKey(candidate)] = index;
+        });
+
+        candidates.forEach(function (rawCandidate) {
+            var candidate = normalizeDiscoveredCandidate(rawCandidate);
+            var key = getCandidateDedupeKey(candidate);
+            var existingIndex = indexByKey[key];
+
+            if (existingIndex != null) {
+                state.candidates[existingIndex] = Object.assign({}, state.candidates[existingIndex], candidate, {
+                    id: state.candidates[existingIndex].id
+                });
+                result.updated += 1;
+                return;
+            }
+
+            state.candidates.push(candidate);
+            indexByKey[key] = state.candidates.length - 1;
+            result.added += 1;
+        });
+
+        return result;
+    }
+
+    function normalizeDiscoveredCandidate(candidate) {
+        var sourceProvider = String(candidate.sourceProvider || "mock");
+        var sourceId = String(candidate.sourceId || candidate.id || "");
+
+        return {
+            id: String(candidate.id || sourceId || createId()),
+            airline: String(candidate.airline || "Flight option"),
+            airlineType: normalizeAirlineType(candidate.airlineType, candidate.airline),
+            price: Number(candidate.price || 0),
+            stops: Number(candidate.stops || 0),
+            fareClass: normalizeFareClass(candidate.fareClass),
+            departTime: normalizeTime(candidate.departTime),
+            returnTime: normalizeTime(candidate.returnTime),
+            link: String(candidate.link || ""),
+            notes: String(candidate.notes || ""),
+            origin: cleanAirport(candidate.origin || state.currentPlan.origin || "BOS"),
+            destination: String(candidate.destination || state.currentPlan.destination || ""),
+            createdAt: String(candidate.createdAt || new Date().toISOString()),
+            sourceProvider: sourceProvider,
+            sourceId: sourceId || sourceProvider + ":" + createId(),
+            fetchedAt: String(candidate.fetchedAt || new Date().toISOString())
+        };
+    }
+
+    function getCandidateDedupeKey(candidate) {
+        if (candidate.sourceProvider && candidate.sourceId) {
+            return [candidate.sourceProvider, candidate.sourceId].join(":");
+        }
+
+        return [
+            cleanAirport(candidate.origin || state.currentPlan.origin || "BOS"),
+            String(candidate.destination || state.currentPlan.destination || "").toLowerCase(),
+            String(candidate.airline || "").toLowerCase(),
+            String(candidate.departTime || ""),
+            String(candidate.returnTime || ""),
+            String(candidate.price || "")
+        ].join("|");
+    }
+
+    function setDiscoveryStatus(kind, message) {
+        state.discovery = Object.assign({}, state.discovery || defaultState().discovery, {
+            lastStatus: message,
+            lastKind: kind,
+            lastRunAt: new Date().toISOString()
+        });
+        renderDiscoveryStatus();
+        persistSoon();
+    }
+
+    function clearDiscoveryStatus() {
+        if (!state.discovery || !state.discovery.lastStatus) {
+            return;
+        }
+
+        state.discovery = Object.assign({}, state.discovery, {
+            lastStatus: "",
+            lastKind: "idle",
+            lastCacheHit: false,
+            lastCount: 0
+        });
+    }
+
+    function getDiscoveryError(body, status) {
+        if (body && body.error) {
+            if (Array.isArray(body.details) && body.details.length) {
+                return body.error + " " + body.details.join(" ");
+            }
+
+            return body.error;
+        }
+
+        return "Search failed with status " + status;
     }
 
     function addCandidate(event) {
@@ -1231,6 +1485,36 @@
         });
     }
 
+    function formatProvider(value) {
+        var labels = {
+            mock: "Mock API",
+            amadeus: "Amadeus"
+        };
+        return labels[value] || "Search API";
+    }
+
+    function normalizeAirlineType(value, airline) {
+        var type = String(value || "").toLowerCase();
+
+        if (type === "skyteam" || type === "other" || type === "frontier") {
+            return type;
+        }
+
+        return /frontier/i.test(airline || "") ? "frontier" : "other";
+    }
+
+    function normalizeFareClass(value) {
+        var fareClass = String(value || "").toLowerCase();
+        var allowed = ["basic", "main", "comfort", "premium"];
+        return allowed.indexOf(fareClass) >= 0 ? fareClass : "main";
+    }
+
+    function normalizeTime(value) {
+        var time = String(value || "").trim();
+        var match = time.match(/^(\d{2}):(\d{2})/);
+        return match ? match[1] + ":" + match[2] : "";
+    }
+
     function parseLocalDate(value) {
         if (!value) {
             return null;
@@ -1242,6 +1526,13 @@
         }
 
         return new Date(parts[0], parts[1] - 1, parts[2]);
+    }
+
+    function toDateInputValue(date) {
+        var year = date.getFullYear();
+        var month = String(date.getMonth() + 1).padStart(2, "0");
+        var day = String(date.getDate()).padStart(2, "0");
+        return year + "-" + month + "-" + day;
     }
 
     function addDays(date, days) {
@@ -1266,6 +1557,22 @@
 
     function cleanAirport(value) {
         return String(value || "").trim().toUpperCase();
+    }
+
+    function getDiscoveryApiBase() {
+        var queryValue = new URLSearchParams(window.location.search).get("plannerApi");
+        var configured = queryValue || "";
+        var meta = document.querySelector("meta[name='planner-api-base']");
+
+        if (!configured && meta) {
+            configured = meta.getAttribute("content") || "";
+        }
+
+        if (!configured && (window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost")) {
+            configured = LOCAL_DISCOVERY_API_BASE;
+        }
+
+        return configured.replace(/\/$/, "");
     }
 
     function shortAirline(value) {
