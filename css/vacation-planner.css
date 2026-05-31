@@ -410,6 +410,24 @@
     font-weight: 700;
 }
 
+.rule-pill-soft {
+    border-left-color: #1d4ed8;
+    background: #eff6ff;
+}
+
+.rule-kind {
+    flex: 0 0 auto;
+    min-width: 42px;
+    color: #1d4ed8;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.rule-pill-must .rule-kind {
+    color: #0f766e;
+}
+
 .check-grid {
     display: grid;
     gap: 8px;
@@ -556,6 +574,46 @@
 
 .candidate-notes {
     margin-top: 8px;
+}
+
+.rule-result-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    list-style: none;
+    margin: 10px 0 0;
+    padding: 0;
+}
+
+.rule-result-list li {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 26px;
+    padding: 0 8px;
+    background: #f8fafc;
+    border: 1px solid #d9dee7;
+    color: #4b5563;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.rule-result-pass {
+    background: #eef7f4 !important;
+    border-color: #cce7df !important;
+    color: #0f6e6b !important;
+}
+
+.rule-result-warn {
+    background: #fff7db !important;
+    border-color: #f3df9a !important;
+    color: #815f0d !important;
+}
+
+.rule-result-fail {
+    background: #f5e8e8 !important;
+    border-color: #e8c8c7 !important;
+    color: #9e302b !important;
 }
 
 .candidate-controls {
