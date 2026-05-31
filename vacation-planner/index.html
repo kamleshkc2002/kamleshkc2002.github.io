@@ -29,8 +29,9 @@
     <main class="planner-shell">
         <header class="planner-toolbar" aria-labelledby="planner-title">
             <div>
-                <p class="planner-kicker">Personal tools</p>
+                <p class="planner-kicker">Rules-based trip search</p>
                 <h1 id="planner-title">Vacation Planner</h1>
+                <p class="planner-subtitle">Start with a destination, collect options from trusted sources, then let your rules pick the best plan.</p>
             </div>
             <div class="planner-toolbar-actions" aria-label="Planner actions">
                 <span class="save-state" id="saveState" aria-live="polite">
@@ -67,8 +68,8 @@
                 <strong id="benchmarkSummary">Add fares</strong>
             </div>
             <div>
-                <span class="status-label">Alerts</span>
-                <strong id="alertSummary">0 active</strong>
+                <span class="status-label">Options found</span>
+                <strong id="optionSummary">0 collected</strong>
             </div>
         </section>
 
@@ -76,8 +77,8 @@
             <aside class="planner-panel planner-panel-settings" aria-labelledby="trip-settings-title">
                 <div class="panel-heading-row">
                     <div>
-                        <p class="panel-kicker">Trip setup</p>
-                        <h2 id="trip-settings-title">Plan</h2>
+                        <p class="panel-kicker">Search setup</p>
+                        <h2 id="trip-settings-title">Destination</h2>
                     </div>
                     <button class="icon-button" type="button" id="resetCurrentPlan" title="Reset current plan" aria-label="Reset current plan">
                         <i class="fa fa-refresh" aria-hidden="true"></i>
@@ -180,8 +181,8 @@
             <section class="planner-panel planner-panel-main" aria-labelledby="flights-title">
                 <div class="panel-heading-row">
                     <div>
-                        <p class="panel-kicker">Flight planner</p>
-                        <h2 id="flights-title">Candidates</h2>
+                        <p class="panel-kicker">Recommendation</p>
+                        <h2 id="flights-title">Best option found so far</h2>
                     </div>
                     <div class="compact-actions">
                         <select id="candidateFilter" title="Filter candidates" aria-label="Filter candidates">
@@ -202,11 +203,37 @@
                 <div class="recommendation-board" id="recommendationBoard" aria-live="polite">
                     <div class="empty-recommendation">
                         <i class="fa fa-plane" aria-hidden="true"></i>
-                        Add a fare to build the recommendation.
+                        Collect an option to build the recommendation.
                     </div>
                 </div>
 
+                <section class="discovery-panel" aria-labelledby="discovery-title">
+                    <div>
+                        <p class="panel-kicker">Candidate discovery</p>
+                        <h3 id="discovery-title">Search sources</h3>
+                        <p>Use the current destination, dates, and rules as the query. Automated source crawling is the next integration; for now, add or import promising options below.</p>
+                    </div>
+                    <div class="source-grid" aria-label="Planned search sources">
+                        <div class="source-card">
+                            <span>Flights</span>
+                            <strong>Google Flights / airline sites</strong>
+                        </div>
+                        <div class="source-card">
+                            <span>Stays</span>
+                            <strong>Hotels and neighborhoods</strong>
+                        </div>
+                        <div class="source-card">
+                            <span>Constraints</span>
+                            <strong>Budget, timing, loyalty, stops</strong>
+                        </div>
+                    </div>
+                </section>
+
                 <form id="candidateForm" class="candidate-form">
+                    <div class="form-section-heading">
+                        <p class="panel-kicker">Fallback input</p>
+                        <h3>Add an option manually</h3>
+                    </div>
                     <div class="candidate-form-grid">
                         <div class="form-field">
                             <label for="candidateAirline">Airline</label>
