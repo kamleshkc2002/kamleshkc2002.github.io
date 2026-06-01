@@ -1,7 +1,7 @@
 export type AirlineType = "skyteam" | "other" | "frontier";
 export type FareClass = "basic" | "main" | "comfort" | "premium";
 export type PlannerBranch = "preferred" | "alternate";
-export type ProviderName = "mock" | "amadeus";
+export type ProviderName = "mock" | "amadeus" | "serpapi";
 
 export interface FlightSearchRules {
   branch?: PlannerBranch;
@@ -80,6 +80,9 @@ export interface Env {
   AMADEUS_CLIENT_ID?: string;
   AMADEUS_CLIENT_SECRET?: string;
   AMADEUS_BASE_URL?: string;
+  SERPAPI_API_KEY?: string;
+  SERPAPI_BASE_URL?: string;
+  SERPAPI_DEEP_SEARCH?: string;
 }
 
 export interface ExecutionContextLike {

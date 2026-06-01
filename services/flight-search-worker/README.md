@@ -16,15 +16,21 @@ The vacation planner page defaults to `http://127.0.0.1:8787` when it is running
 
 1. Create a KV namespace and replace the placeholder IDs in `wrangler.toml`.
 2. Keep `FLIGHT_PROVIDER = "mock"` until provider credentials are ready.
-3. For Amadeus, set secrets:
+3. For SerpApi Google Flights, set the API key as a secret:
+
+```sh
+wrangler secret put SERPAPI_API_KEY
+```
+
+4. For temporary Amadeus experiments, set secrets:
 
 ```sh
 wrangler secret put AMADEUS_CLIENT_ID
 wrangler secret put AMADEUS_CLIENT_SECRET
 ```
 
-4. Change `FLIGHT_PROVIDER` to `amadeus`.
-5. Deploy:
+5. Change `FLIGHT_PROVIDER` to the selected provider, such as `serpapi`.
+6. Deploy:
 
 ```sh
 npm run deploy
@@ -76,3 +82,5 @@ Request:
 ```
 
 Response candidates are shaped for the existing frontend rule engine: airline, airline type, price, stops, fare class, departure/return times, link, notes, origin, destination, and source metadata.
+
+The initial SerpApi Google Flights adapter is a discovery spike. It normalizes the first search result set into planner candidates; round-trip return selection may need a later `departure_token` follow-up flow before production activation.
