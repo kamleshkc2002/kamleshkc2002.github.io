@@ -2,6 +2,10 @@ name = "vacation-planner-flight-search"
 main = "src/index.ts"
 compatibility_date = "2026-05-31"
 
+[observability]
+enabled = true
+head_sampling_rate = 1
+
 [vars]
 FLIGHT_PROVIDER = "mock"
 CACHE_TTL_SECONDS = "21600"
