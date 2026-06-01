@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "wrangler dev",
+    "dev:serpapi": "wrangler dev --var FLIGHT_PROVIDER:serpapi",
     "deploy": "wrangler deploy",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
