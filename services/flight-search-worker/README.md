@@ -32,12 +32,12 @@ curl -s http://127.0.0.1:8787/api/search/flights \
   --data '{"origin":"BOS","destination":"LAX","travelWindow":{"startDate":"2026-07-02","endDate":"2026-07-06"},"passengers":1,"rules":{"maxStops":1}}'
 ```
 
-The `.dev.vars` file is ignored by git. Keep the production `FLIGHT_PROVIDER` in `wrangler.toml` on `mock` until live response shape and quota behavior are verified.
+The `.dev.vars` file is ignored by git. Use this flow to verify response shape and quota behavior before deploying provider changes.
 
 ## Production Setup
 
 1. Create a KV namespace and replace the placeholder IDs in `wrangler.toml`.
-2. Keep `FLIGHT_PROVIDER = "mock"` until provider credentials are ready.
+2. Keep provider credentials in Worker secrets, not code.
 3. For SerpApi Google Flights, set the API key as a secret:
 
 ```sh
@@ -51,7 +51,7 @@ wrangler secret put AMADEUS_CLIENT_ID
 wrangler secret put AMADEUS_CLIENT_SECRET
 ```
 
-5. Change `FLIGHT_PROVIDER` to the selected provider, such as `serpapi`.
+5. `FLIGHT_PROVIDER` is set to `serpapi` for production discovery searches.
 6. Deploy:
 
 ```sh
@@ -66,9 +66,9 @@ The Worker is public, so CORS is not treated as abuse protection. Cache hits ret
 
 Configured defaults:
 
-- `RATE_LIMIT_MAX_REQUESTS = "30"` uncached searches per client window.
+- `RATE_LIMIT_MAX_REQUESTS = "10"` uncached searches per client window.
 - `RATE_LIMIT_WINDOW_SECONDS = "60"` seconds per rate-limit window.
-- `PROVIDER_DAILY_CALL_LIMIT = "25"` real provider calls per UTC day.
+- `PROVIDER_DAILY_CALL_LIMIT = "10"` real provider calls per UTC day.
 
 The daily provider cap applies when `FLIGHT_PROVIDER` is not `mock`. For local tests, `ENFORCE_PROVIDER_DAILY_LIMIT_FOR_MOCK = "true"` can force the mock provider through the same daily cap path.
 
