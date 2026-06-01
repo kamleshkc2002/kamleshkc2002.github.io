@@ -1,0 +1,4 @@
+# Copy this file to .dev.vars for local SerpApi smoke tests.
+# Do not commit real keys in .dev.vars.
+SERPAPI_API_KEY=replace-with-serpapi-key
+SERPAPI_DEEP_SEARCH=false

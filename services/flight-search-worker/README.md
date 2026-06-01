@@ -12,6 +12,28 @@ npm run dev
 
 The vacation planner page defaults to `http://127.0.0.1:8787` when it is running on `localhost` or `127.0.0.1`, so the local Jekyll page can call the Worker without extra configuration.
 
+### Local SerpApi Smoke Test
+
+To test the SerpApi provider locally without committing secrets:
+
+```sh
+cd services/flight-search-worker
+cp .dev.vars.example .dev.vars
+# Edit .dev.vars and set SERPAPI_API_KEY.
+npm run dev:serpapi
+```
+
+Then call the Worker:
+
+```sh
+curl -s http://127.0.0.1:8787/health
+curl -s http://127.0.0.1:8787/api/search/flights \
+  -H "Content-Type: application/json" \
+  --data '{"origin":"BOS","destination":"LAX","travelWindow":{"startDate":"2026-07-02","endDate":"2026-07-06"},"passengers":1,"rules":{"maxStops":1}}'
+```
+
+The `.dev.vars` file is ignored by git. Keep the production `FLIGHT_PROVIDER` in `wrangler.toml` on `mock` until live response shape and quota behavior are verified.
+
 ## Production Setup
 
 1. Create a KV namespace and replace the placeholder IDs in `wrangler.toml`.
