@@ -9,6 +9,7 @@ import {
   recordProviderCall
 } from "./guardrails";
 import { getProvider } from "./providers";
+import { ProviderError, providerErrorBody } from "./providers/errors";
 import type { Env, ExecutionContextLike, FlightSearchResponse } from "./types";
 import { validateFlightSearchRequest } from "./validation";
 
@@ -129,6 +130,10 @@ async function searchFlights(request: Request, env: Env, ctx: ExecutionContextLi
 
     return jsonResponse(request, env, response);
   } catch (error) {
+    if (error instanceof ProviderError) {
+      return jsonResponse(request, env, providerErrorBody(error), { status: error.status });
+    }
+
     return jsonResponse(request, env, {
       error: error instanceof Error ? error.message : "Flight search failed."
     }, { status: 502 });

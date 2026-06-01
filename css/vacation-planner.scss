@@ -158,6 +158,12 @@
     font-weight: 800;
 }
 
+.field-hint {
+    margin: 0;
+    color: var(--kc-muted);
+    font-size: 12px;
+}
+
 .form-field input,
 .form-field select,
 .form-field textarea,

@@ -13,7 +13,7 @@ export function validateFlightSearchRequest(value: unknown): ValidationResult {
 
   const input = value as Record<string, unknown>;
   const origin = cleanAirport(input.origin);
-  const destination = String(input.destination || "").trim();
+  const destination = cleanAirport(input.destination);
   const travelWindow = readTravelWindow(input.travelWindow);
   const errors: string[] = [];
 

@@ -19,7 +19,7 @@ planner_api_base: https://vacation-planner-flight-search.kamleshkc2002.workers.d
             <div>
                 <p class="planner-kicker">Rules-based trip search</p>
                 <h1 id="planner-title">Vacation Planner</h1>
-                <p class="planner-subtitle">Start with a destination, collect options from trusted sources, then let your rules pick the best plan.</p>
+                <p class="planner-subtitle">Start with a destination airport, collect options from trusted sources, then let your rules pick the best plan.</p>
             </div>
             <div class="planner-toolbar-actions" aria-label="Planner actions">
                 <span class="save-state" id="saveState" aria-live="polite">
@@ -80,8 +80,9 @@ planner_api_base: https://vacation-planner-flight-search.kamleshkc2002.workers.d
                     </div>
 
                     <div class="form-field">
-                        <label for="destination">Destination</label>
-                        <input type="text" id="destination" name="destination" placeholder="City or airport">
+                        <label for="destination">Destination airport</label>
+                        <input type="text" id="destination" name="destination" maxlength="4" placeholder="LAX" aria-describedby="destinationHint">
+                        <p class="field-hint" id="destinationHint">Use a 3-letter IATA airport code for provider searches.</p>
                     </div>
 
                     <div class="split-fields">
@@ -199,7 +200,7 @@ planner_api_base: https://vacation-planner-flight-search.kamleshkc2002.workers.d
                     <div>
                         <p class="panel-kicker">Candidate discovery</p>
                         <h3 id="discovery-title">Search sources</h3>
-                        <p>Use the current setup to collect flight options from the configured search API.</p>
+                        <p>Use the current airport-code setup to collect flight options from the configured search API.</p>
                     </div>
                     <form id="discoveryForm" class="discovery-form">
                         <div class="discovery-actions">

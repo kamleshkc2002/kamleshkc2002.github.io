@@ -15,7 +15,7 @@ describe("validateFlightSearchRequest", () => {
     expect(result.ok).toBe(true);
     expect(result.request).toMatchObject({
       origin: "BOS",
-      destination: "lax",
+      destination: "LAX",
       passengers: 2,
       budget: 450,
       rules: {
