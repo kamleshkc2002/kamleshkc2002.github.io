@@ -1,9 +1,10 @@
 ---
 ---
 
-@use "kc/tokens";
-@use "kc/base";
-@use "kc/components";
+// GitHub Pages does not compile Sass module @use rules in this repo's Pages build.
+@import "kc/tokens";
+@import "kc/base";
+@import "kc/components";
 
 .site-shell {
     max-width: 960px;
