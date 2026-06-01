@@ -208,7 +208,7 @@ function readPlannerForm() {
 
     app.state.currentPlan = Object.assign({}, app.state.currentPlan, {
         tripName: els.tripName.value.trim(),
-        destination: els.destination.value.trim(),
+        destination: cleanAirport(els.destination.value),
         origin: cleanAirport(els.origin.value || "BOS"),
         budget: els.budget.value,
         tripStyle: els.tripStyle.value,

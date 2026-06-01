@@ -106,7 +106,7 @@ describe("worker", () => {
     const second = await handleRequest(searchRequest({ "CF-Connecting-IP": "203.0.113.10" }), env, ctx());
     const body = await second.json<{ code: string; error: string }>();
 
-    expect(first.status).toBe(502);
+    expect(first.status).toBe(503);
     expect(second.status).toBe(429);
     expect(body.code).toBe("RATE_LIMITED");
     expect(body.error).toContain("Too many uncached searches");
@@ -137,6 +137,28 @@ describe("worker", () => {
     expect(response.status).toBe(503);
     expect(body.code).toBe("GUARDRAILS_UNAVAILABLE");
     expect(body.error).toContain("quota guardrails");
+  });
+
+  it("returns structured provider errors", async () => {
+    const response = await handleRequest(new Request("http://worker.test/api/search/flights", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        origin: "BOS",
+        destination: "Paris",
+        travelWindow: { startDate: "2026-07-02" }
+      })
+    }), {
+      FLIGHT_PROVIDER: "amadeus",
+      SEARCH_CACHE: memoryKv()
+    }, ctx());
+    const body = await response.json<{ code: string; error: string }>();
+
+    expect(response.status).toBe(400);
+    expect(body.code).toBe("PROVIDER_BAD_AIRPORT");
+    expect(body.error).toContain("3-letter airport code");
   });
 
   it("bypasses rate and provider caps when a cached response exists", async () => {

@@ -1,8 +1,13 @@
 import type { Env, FareClass, FlightCandidate, FlightSearchProvider, FlightSearchRequest } from "../types";
+import { ProviderError } from "./errors";
 
 interface AmadeusTokenResponse {
   access_token?: string;
   expires_in?: number;
+}
+
+interface AmadeusTokenCache {
+  accessToken?: string;
 }
 
 interface AmadeusFlightOffer {
@@ -34,6 +39,7 @@ interface AmadeusFlightOffer {
 }
 
 const SKYTEAM_CODES = new Set(["AR", "AM", "AF", "CI", "DL", "GA", "KL", "KE", "ME", "MU", "RO", "SV", "UX", "VN", "VS", "MF"]);
+const TOKEN_CACHE_KEY = "amadeus:access_token";
 
 export const amadeusProvider: FlightSearchProvider = {
   name: "amadeus",
@@ -50,7 +56,7 @@ export const amadeusProvider: FlightSearchProvider = {
     });
 
     if (!response.ok) {
-      throw new Error(`Amadeus search failed with ${response.status}.`);
+      throw new ProviderError("PROVIDER_UNAVAILABLE", `Amadeus search failed with ${response.status}.`);
     }
 
     const payload = await response.json<{ data?: AmadeusFlightOffer[] }>();
@@ -62,7 +68,12 @@ export const amadeusProvider: FlightSearchProvider = {
 
 async function getAccessToken(env: Env): Promise<string> {
   if (!env.AMADEUS_CLIENT_ID || !env.AMADEUS_CLIENT_SECRET) {
-    throw new Error("Amadeus credentials are not configured.");
+    throw new ProviderError("PROVIDER_CREDENTIALS_MISSING", "Amadeus credentials are not configured.", 503);
+  }
+
+  const cached = await readCachedAccessToken(env);
+  if (cached) {
+    return cached;
   }
 
   const baseUrl = getBaseUrl(env);
@@ -79,15 +90,42 @@ async function getAccessToken(env: Env): Promise<string> {
   });
 
   if (!response.ok) {
-    throw new Error(`Amadeus token request failed with ${response.status}.`);
+    throw new ProviderError("PROVIDER_AUTH_FAILED", `Amadeus token request failed with ${response.status}.`, 503);
   }
 
   const payload = await response.json<AmadeusTokenResponse>();
   if (!payload.access_token) {
-    throw new Error("Amadeus token response did not include an access token.");
+    throw new ProviderError("PROVIDER_AUTH_FAILED", "Amadeus token response did not include an access token.", 503);
   }
 
+  await writeCachedAccessToken(env, payload);
   return payload.access_token;
+}
+
+async function readCachedAccessToken(env: Env): Promise<string | null> {
+  const cached = await env.SEARCH_CACHE?.get<AmadeusTokenCache>(TOKEN_CACHE_KEY, "json");
+  return cached?.accessToken || null;
+}
+
+async function writeCachedAccessToken(env: Env, payload: AmadeusTokenResponse): Promise<void> {
+  if (!env.SEARCH_CACHE || !payload.access_token) {
+    return;
+  }
+
+  await env.SEARCH_CACHE.put(TOKEN_CACHE_KEY, JSON.stringify({
+    accessToken: payload.access_token
+  }), {
+    expirationTtl: getTokenCacheTtlSeconds(payload.expires_in)
+  });
+}
+
+function getTokenCacheTtlSeconds(expiresIn?: number): number {
+  const seconds = Number(expiresIn || 0);
+  if (!Number.isFinite(seconds) || seconds <= 120) {
+    return 60;
+  }
+
+  return Math.max(60, Math.floor(seconds - 60));
 }
 
 function buildSearchUrl(request: FlightSearchRequest, env: Env): string {
@@ -189,7 +227,7 @@ function timeFromIso(value?: string): string {
 
 function requireIataCode(value: string, label: string): void {
   if (!/^[A-Z]{3}$/i.test(value)) {
-    throw new Error(`${label} must be a 3-letter airport code for the Amadeus provider.`);
+    throw new ProviderError("PROVIDER_BAD_AIRPORT", `${label} must be a 3-letter airport code for Amadeus searches.`, 400);
   }
 }
 

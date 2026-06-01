@@ -86,7 +86,7 @@ export function buildFlightSearchRequest(app) {
 
     return {
         origin: cleanAirport(plan.origin || "BOS"),
-        destination: plan.destination.trim(),
+        destination: cleanAirport(plan.destination),
         travelWindow: windowDates,
         passengers: 1,
         budget: Number(plan.budget || 0) || undefined,
@@ -224,6 +224,22 @@ export function getDiscoveryError(body, status) {
 
     if (body && body.code === "GUARDRAILS_UNAVAILABLE") {
         return "Search is temporarily unavailable because quota guardrails are not configured.";
+    }
+
+    if (body && body.code === "PROVIDER_BAD_AIRPORT") {
+        return "Use a 3-letter destination airport code like LAX, JFK, or CDG.";
+    }
+
+    if (body && body.code === "PROVIDER_CREDENTIALS_MISSING") {
+        return "Flight provider credentials are not configured yet.";
+    }
+
+    if (body && body.code === "PROVIDER_AUTH_FAILED") {
+        return "Flight provider authorization failed. Check the provider credentials and try again.";
+    }
+
+    if (body && body.code === "PROVIDER_UNAVAILABLE") {
+        return "The flight provider is temporarily unavailable. Try again later.";
     }
 
     if (body && body.error) {
