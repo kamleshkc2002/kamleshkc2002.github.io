@@ -6,19 +6,31 @@
 
 html {
     scroll-behavior: smooth;
+    background: var(--kc-bg);
 }
 
 body {
     margin: 0;
-    background: var(--kc-bg);
+    background: radial-gradient(circle at 50% -10%, #1e1b4b 0%, #090d16 55%);
+    background-attachment: fixed;
     color: var(--kc-text);
     font-family: var(--kc-font-sans);
     line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+::selection {
+    background: var(--kc-accent);
+    color: #ffffff;
 }
 
 a {
     color: inherit;
     text-decoration: none;
+    transition: var(--kc-transition-fast);
 }
 
 a:hover,
@@ -29,8 +41,19 @@ a:focus {
 p,
 h1,
 h2,
-h3 {
+h3,
+h4,
+h5 {
     margin-top: 0;
+}
+
+h1,
+h2,
+h3,
+h4 {
+    color: var(--kc-text-heading);
+    font-family: var(--kc-font-display);
+    font-weight: 700;
 }
 
 p {
