@@ -11,6 +11,10 @@
 
     <title>{% if page.title %}{{ page.title }} | {{ site.title }}{% else %}{{ site.title }}{% endif %}</title>
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
     {% if page.font_awesome %}
     <link rel="stylesheet" href="{{ '/font-awesome/css/font-awesome.min.css' | relative_url }}" type="text/css">
     {% endif %}
