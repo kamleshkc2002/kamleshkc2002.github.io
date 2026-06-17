@@ -1,5 +1,6 @@
 import type { Env, FareClass, FlightCandidate, FlightSearchProvider, FlightSearchRequest } from "../types";
 import { ProviderError } from "./errors";
+import { recordProviderCall, getGuardrailConfig } from "../guardrails";
 
 interface SerpApiFlightSearchResponse {
   error?: string;
@@ -81,19 +82,65 @@ export const serpApiProvider: FlightSearchProvider = {
       throw new ProviderError("PROVIDER_UNAVAILABLE", `SerpApi search failed with ${response.status}.`);
     }
 
-    const payload = await response.json<SerpApiFlightSearchResponse>();
-    if (payload.error) {
-      throw new ProviderError(getPayloadErrorCode(payload.error), `SerpApi search failed: ${payload.error}`, 503);
+    const outboundPayload = await response.json<SerpApiFlightSearchResponse>();
+    if (outboundPayload.error) {
+      throw new ProviderError(getPayloadErrorCode(outboundPayload.error), `SerpApi search failed: ${outboundPayload.error}`, 503);
     }
 
-    if (payload.search_metadata?.status?.toLowerCase() === "error") {
+    if (outboundPayload.search_metadata?.status?.toLowerCase() === "error") {
       throw new ProviderError("PROVIDER_UNAVAILABLE", "SerpApi search failed with an error status.");
     }
 
     const fetchedAt = new Date().toISOString();
-    return collectResults(payload)
-      .slice(0, 12)
-      .map((result, index) => normalizeResult(result, request, payload, fetchedAt, index));
+    const outboundResults = collectResults(outboundPayload);
+
+    // If one-way search or no outbound results, just return normalized outbound results
+    if (!request.travelWindow.endDate || outboundResults.length === 0) {
+      return outboundResults
+        .slice(0, 12)
+        .map((result, index) => normalizeResult(result, request, outboundPayload, fetchedAt, index));
+    }
+
+    // Round-trip search! We will process the top outbound results and fetch their return options
+    const maxOutboundFollowups = 3;
+    const candidates: FlightCandidate[] = [];
+
+    // Slice to the top few outbound options to respect SerpApi call quota limits
+    const topOutbound = outboundResults.slice(0, maxOutboundFollowups);
+
+    for (let i = 0; i < topOutbound.length; i++) {
+      const outbound = topOutbound[i];
+      if (!outbound.departure_token) {
+        // If there's no departure token, return this as an outbound-only option
+        candidates.push(normalizeResult(outbound, request, outboundPayload, fetchedAt, i));
+        continue;
+      }
+
+      try {
+        const returnPayload = await fetchReturnFlights(outbound.departure_token, request, env);
+        const returnResults = collectResults(returnPayload);
+
+        if (returnResults.length === 0) {
+          // No return flights found for this outbound option, but we can still return the outbound-only candidate
+          candidates.push(normalizeResult(outbound, request, outboundPayload, fetchedAt, i));
+          continue;
+        }
+
+        // Pair the outbound flight with each return flight option
+        for (let j = 0; j < returnResults.length; j++) {
+          const returnFlight = returnResults[j];
+          const combinedCandidate = combineFlights(outbound, returnFlight, request, outboundPayload, returnPayload, fetchedAt, i, j);
+          candidates.push(combinedCandidate);
+        }
+      } catch (error) {
+        // If a follow-up fails, fall back to the outbound-only candidate
+        console.error("fetchReturnFlights error:", error);
+        candidates.push(normalizeResult(outbound, request, outboundPayload, fetchedAt, i));
+      }
+    }
+
+    // Slice to top 12 candidates
+    return candidates.slice(0, 12);
   }
 };
 
@@ -295,4 +342,113 @@ function buildGoogleFlightsLink(request: FlightSearchRequest): string {
 
 function getBaseUrl(env: Env): string {
   return (env.SERPAPI_BASE_URL || "https://serpapi.com/search").replace(/\/$/, "");
+}
+
+async function fetchReturnFlights(departureToken: string, request: FlightSearchRequest, env: Env): Promise<SerpApiFlightSearchResponse> {
+  const url = new URL(getBaseUrl(env));
+  url.searchParams.set("engine", "google_flights");
+  url.searchParams.set("api_key", env.SERPAPI_API_KEY || "");
+  url.searchParams.set("departure_id", request.origin);
+  url.searchParams.set("arrival_id", request.destination.toUpperCase());
+  url.searchParams.set("outbound_date", request.travelWindow.startDate);
+  if (request.travelWindow.endDate) {
+    url.searchParams.set("return_date", request.travelWindow.endDate);
+  }
+  url.searchParams.set("departure_token", departureToken);
+  url.searchParams.set("currency", "USD");
+  url.searchParams.set("hl", "en");
+  url.searchParams.set("gl", "us");
+  url.searchParams.set("adults", String(request.passengers || 1));
+
+  const response = await fetch(url.toString(), {
+    headers: {
+      Accept: "application/json"
+    }
+  });
+
+  if (response.status === 401 || response.status === 403) {
+    throw new ProviderError("PROVIDER_AUTH_FAILED", `SerpApi authorization failed with ${response.status}.`, 503);
+  }
+
+  if (!response.ok) {
+    let detail = "";
+    try {
+      const errPayload = await response.json<{ error?: string }>();
+      detail = errPayload.error || "";
+    } catch (_) {}
+    throw new ProviderError("PROVIDER_UNAVAILABLE", `SerpApi search failed with ${response.status}: ${detail}`);
+  }
+
+  const payload = await response.json<SerpApiFlightSearchResponse>();
+  if (payload.error) {
+    throw new ProviderError(getPayloadErrorCode(payload.error), `SerpApi search failed: ${payload.error}`, 503);
+  }
+
+  // Record this sequential request in the daily limit
+  await recordProviderCall(env, "serpapi", getGuardrailConfig(env), new Date(), 1);
+
+  return payload;
+}
+
+function combineFlights(
+  outbound: SerpApiFlightResult,
+  returnFlight: SerpApiFlightResult,
+  request: FlightSearchRequest,
+  outboundPayload: SerpApiFlightSearchResponse,
+  returnPayload: SerpApiFlightSearchResponse,
+  fetchedAt: string,
+  outboundIndex: number,
+  returnIndex: number
+): FlightCandidate {
+  const outboundSegments = outbound.flights || [];
+  const returnSegments = returnFlight.flights || [];
+  const firstOutbound = outboundSegments[0];
+  const lastOutbound = outboundSegments[outboundSegments.length - 1];
+  const firstReturn = returnSegments[0];
+  const lastReturn = returnSegments[returnSegments.length - 1];
+
+  const airline = firstOutbound?.airline || firstReturn?.airline || "Flight";
+  const outboundStops = getStops(outbound);
+  const returnStops = getStops(returnFlight);
+
+  const sourceId = [
+    "serpapi",
+    outboundPayload.search_metadata?.id || "search",
+    outboundIndex,
+    returnIndex,
+    outbound.departure_token || outbound.booking_token || getFlightNumbers(outboundSegments).join("-"),
+    returnFlight.departure_token || returnFlight.booking_token || getFlightNumbers(returnSegments).join("-") || fetchedAt
+  ].join(":");
+
+  const outboundFlightNumbers = getFlightNumbers(outboundSegments);
+  const returnFlightNumbers = getFlightNumbers(returnSegments);
+  const details = [...outboundFlightNumbers, ...returnFlightNumbers];
+  const notesList = details.length
+    ? [`SerpApi Google Flights round-trip: Outbound (${outboundFlightNumbers.join(", ")}), Return (${returnFlightNumbers.join(", ")})`]
+    : ["SerpApi Google Flights round-trip."];
+
+  if (outbound.total_duration || returnFlight.total_duration) {
+    const outDur = outbound.total_duration ? formatDuration(outbound.total_duration) : "unknown";
+    const retDur = returnFlight.total_duration ? formatDuration(returnFlight.total_duration) : "unknown";
+    notesList.push(`Duration: Outbound ${outDur}, Return ${retDur}.`);
+  }
+
+  return {
+    id: sourceId,
+    airline,
+    airlineType: getAirlineType(firstOutbound),
+    price: parsePrice(returnFlight.price || outbound.price),
+    stops: Math.max(outboundStops, returnStops),
+    fareClass: getFareClass([...outboundSegments, ...returnSegments]),
+    departTime: timeFromSerpApi(firstOutbound?.departure_airport?.time),
+    returnTime: timeFromSerpApi(firstReturn?.departure_airport?.time),
+    link: returnPayload.search_metadata?.google_flights_url || outboundPayload.search_metadata?.google_flights_url || buildGoogleFlightsLink(request),
+    notes: notesList.join(" "),
+    origin: firstOutbound?.departure_airport?.id || request.origin,
+    destination: lastOutbound?.arrival_airport?.id || request.destination.toUpperCase(),
+    createdAt: fetchedAt,
+    sourceProvider: "serpapi",
+    sourceId,
+    fetchedAt
+  };
 }
