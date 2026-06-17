@@ -79,6 +79,7 @@ function cacheElements() {
         "excludeBasic",
         "preferSkyTeam",
         "maxStops",
+        "passengers",
         "tripNotes",
         "branchRules",
         "savePlan",
@@ -139,6 +140,7 @@ function bindEvents() {
         "excludeBasic",
         "preferSkyTeam",
         "maxStops",
+        "passengers",
         "tripNotes"
     ].forEach(function (id) {
         var element = els[id];
@@ -194,6 +196,7 @@ function fillPlannerForm() {
     els.excludeBasic.checked = Boolean(plan.excludeBasic);
     els.preferSkyTeam.checked = Boolean(plan.preferSkyTeam);
     els.maxStops.value = String(isFiniteNumber(plan.maxStops) ? plan.maxStops : 1);
+    els.passengers.value = String(isFiniteNumber(plan.passengers) ? plan.passengers : 1);
     els.tripNotes.value = plan.tripNotes || "";
 
     var branch = plan.branch || "preferred";
@@ -219,6 +222,7 @@ function readPlannerForm() {
         excludeBasic: els.excludeBasic.checked,
         preferSkyTeam: els.preferSkyTeam.checked,
         maxStops: Number(els.maxStops.value),
+        passengers: Number(els.passengers.value || 1),
         tripNotes: els.tripNotes.value.trim()
     });
 }
