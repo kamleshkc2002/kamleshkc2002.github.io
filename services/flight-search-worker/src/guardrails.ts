@@ -148,12 +148,12 @@ export async function checkProviderDailyLimit(env: Env, provider: ProviderName, 
   };
 }
 
-export async function recordProviderCall(env: Env, provider: ProviderName, config: GuardrailConfig, now: Date = new Date()): Promise<GuardrailContext> {
+export async function recordProviderCall(env: Env, provider: ProviderName, config: GuardrailConfig, now: Date = new Date(), amount: number = 1): Promise<GuardrailContext> {
   if (!shouldGuardProvider(provider, env) || !env.SEARCH_CACHE) {
     return {};
   }
 
-  const counter = await incrementCounter(env, providerDailyCounterKey(now), secondsUntilUtcTomorrow(now) + 60);
+  const counter = await incrementCounter(env, providerDailyCounterKey(now), secondsUntilUtcTomorrow(now) + 60, amount);
   return {
     providerDailyLimit: {
       limit: config.providerDailyCallLimit,
@@ -177,9 +177,9 @@ function readPositiveInteger(value: string | undefined, fallback: number): numbe
   return Number.isFinite(parsed) && parsed > 0 ? Math.round(parsed) : fallback;
 }
 
-async function incrementCounter(env: Env, key: string, ttlSeconds: number): Promise<CounterResult> {
+async function incrementCounter(env: Env, key: string, ttlSeconds: number, amount: number = 1): Promise<CounterResult> {
   const current = await readCounter(env, key);
-  const next = current + 1;
+  const next = current + amount;
   await env.SEARCH_CACHE?.put(key, String(next), { expirationTtl: ttlSeconds });
   return { key, value: next };
 }

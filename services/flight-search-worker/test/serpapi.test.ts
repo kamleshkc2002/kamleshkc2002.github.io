@@ -106,6 +106,38 @@ function serpApiPayload() {
   };
 }
 
+function serpApiReturnPayload() {
+  return {
+    search_metadata: {
+      id: "search-2",
+      status: "Success",
+      google_flights_url: "https://www.google.com/travel/flights/search/return"
+    },
+    best_flights: [
+      {
+        flights: [
+          {
+            departure_airport: {
+              id: "LAX",
+              time: "2026-07-06 14:15"
+            },
+            arrival_airport: {
+              id: "BOS",
+              time: "2026-07-06 22:30"
+            },
+            airline: "Delta",
+            flight_number: "DL 789",
+            travel_class: "Economy"
+          }
+        ],
+        price: 388,
+        total_duration: 315
+      }
+    ],
+    other_flights: []
+  };
+}
+
 afterEach(() => {
   vi.unstubAllGlobals();
 });
@@ -131,7 +163,9 @@ describe("serpApiProvider", () => {
   });
 
   it("builds a Google Flights request and normalizes results", async () => {
-    const fetchMock = vi.fn().mockResolvedValueOnce(jsonResponse(serpApiPayload()));
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(jsonResponse(serpApiPayload()))
+      .mockResolvedValueOnce(jsonResponse(serpApiReturnPayload()));
     vi.stubGlobal("fetch", fetchMock);
 
     const candidates = await serpApiProvider.search(request, env({
@@ -139,7 +173,7 @@ describe("serpApiProvider", () => {
     }));
     const url = new URL(String(fetchMock.mock.calls[0][0]));
 
-    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
     expect(url.origin + url.pathname).toBe("https://serpapi.test/search");
     expect(url.searchParams.get("engine")).toBe("google_flights");
     expect(url.searchParams.get("api_key")).toBe("serpapi-key");
@@ -154,31 +188,38 @@ describe("serpApiProvider", () => {
       Accept: "application/json"
     });
 
+    // Verify follow-up request URL
+    const followUpUrl = new URL(String(fetchMock.mock.calls[1][0]));
+    expect(followUpUrl.searchParams.get("departure_token")).toBe("departure-token-1");
+
     expect(candidates[0]).toMatchObject({
-      id: "serpapi:search-1:0:departure-token-1",
+      id: "serpapi:search-1:0:0:departure-token-1:DL 789",
       airline: "Delta",
       airlineType: "skyteam",
       price: 388,
       stops: 1,
       fareClass: "main",
       departTime: "17:35",
-      returnTime: "",
-      link: "https://www.google.com/travel/flights/search",
+      returnTime: "14:15",
+      link: "https://www.google.com/travel/flights/search/return",
       origin: "BOS",
       destination: "LAX",
       sourceProvider: "serpapi"
     });
     expect(candidates[0].notes).toContain("DL 123");
-    expect(candidates[0].notes).toContain("Duration 7h 7m");
-    expect(candidates[0].notes).toContain("departure-token");
+    expect(candidates[0].notes).toContain("DL 789");
+    expect(candidates[0].notes).toContain("Duration: Outbound 7h 7m, Return 5h 15m");
 
+    // The second candidate has no departure_token, so it remains outbound-only
     expect(candidates[1]).toMatchObject({
+      id: "serpapi:search-1:1:F9 777",
       airline: "Frontier",
       airlineType: "frontier",
       price: 255,
       stops: 0,
       fareClass: "basic",
       departTime: "09:15",
+      returnTime: "",
       sourceProvider: "serpapi"
     });
   });
