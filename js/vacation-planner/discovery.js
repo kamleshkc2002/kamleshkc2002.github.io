@@ -88,7 +88,7 @@ export function buildFlightSearchRequest(app) {
         origin: cleanAirport(plan.origin || "BOS"),
         destination: cleanAirport(plan.destination),
         travelWindow: windowDates,
-        passengers: 1,
+        passengers: Number(plan.passengers || 1),
         budget: Number(plan.budget || 0) || undefined,
         tripStyle: plan.tripStyle,
         rules: {

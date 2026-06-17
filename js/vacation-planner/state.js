@@ -16,6 +16,7 @@ export function defaultState() {
             excludeBasic: true,
             preferSkyTeam: true,
             maxStops: 1,
+            passengers: 1,
             tripNotes: ""
         },
         candidates: [],

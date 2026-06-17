@@ -96,13 +96,19 @@ planner_api_base: https://vacation-planner-flight-search.kamleshkc2002.workers.d
                         </div>
                     </div>
 
-                    <div class="form-field">
-                        <label for="tripStyle">Trip style</label>
-                        <select id="tripStyle" name="tripStyle">
-                            <option value="weekend_plus_one">Weekend + one day</option>
-                            <option value="long_weekend_plus_one">Long weekend + one day</option>
-                            <option value="custom">Custom dates</option>
-                        </select>
+                    <div class="split-fields">
+                        <div class="form-field">
+                            <label for="tripStyle">Trip style</label>
+                            <select id="tripStyle" name="tripStyle">
+                                <option value="weekend_plus_one">Weekend + one day</option>
+                                <option value="long_weekend_plus_one">Long weekend + one day</option>
+                                <option value="custom">Custom dates</option>
+                            </select>
+                        </div>
+                        <div class="form-field">
+                            <label for="passengers">Passengers</label>
+                            <input type="number" id="passengers" name="passengers" min="1" max="9" value="1">
+                        </div>
                     </div>
 
                     <div class="split-fields">
