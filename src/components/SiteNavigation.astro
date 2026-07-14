@@ -1,0 +1,40 @@
+---
+interface Props {
+  active?: "home" | "vacation-planner";
+  headerClass?: string;
+  brandClass?: string;
+  linksClass?: string;
+  showHome?: boolean;
+}
+
+const {
+  active,
+  headerClass = "site-header",
+  brandClass = "brand",
+  linksClass = "site-nav",
+  showHome = true
+} = Astro.props;
+---
+
+<header class={headerClass}>
+  <a class={brandClass} href="/" aria-label="Kamlesh Chhetty home">KC</a>
+  <nav class={linksClass} aria-label="Primary navigation">
+    {
+      showHome && (
+        <a href="/" class:list={{ "is-active": active === "home" }} aria-current={active === "home" ? "page" : undefined}>
+          Home
+        </a>
+      )
+    }
+    <a href="/#work">Work</a>
+    <a href="/#projects">Projects</a>
+    <a
+      href="/vacation-planner/"
+      class:list={{ "is-active": active === "vacation-planner" }}
+      aria-current={active === "vacation-planner" ? "page" : undefined}
+    >
+      Vacation Planner
+    </a>
+    <a href="/#contact">Contact</a>
+  </nav>
+</header>

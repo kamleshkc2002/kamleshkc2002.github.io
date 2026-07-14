@@ -1,0 +1,47 @@
+---
+import { site } from "../data/site";
+
+interface Props {
+  title?: string;
+  description?: string;
+  fontAwesome?: boolean;
+  stylesheet?: string;
+  stylesheets?: string[];
+  plannerApiBase?: string;
+}
+
+const {
+  title,
+  description = site.description,
+  fontAwesome = false,
+  stylesheet,
+  stylesheets = [],
+  plannerApiBase
+} = Astro.props;
+
+const pageTitle = title ? `${title} | ${site.title}` : site.title;
+---
+
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content={description} />
+  <meta name="author" content="Kamlesh Chhetty" />
+  {plannerApiBase && <meta name="planner-api-base" content={plannerApiBase} />}
+
+  <title>{pageTitle}</title>
+
+  <link rel="icon" href="/favicon.ico" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+
+  {fontAwesome && <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css" type="text/css" />}
+  <link rel="stylesheet" href="/css/main.css" type="text/css" />
+  {stylesheet && <link rel="stylesheet" href={stylesheet} type="text/css" />}
+  {stylesheets.map((href) => <link rel="stylesheet" href={href} type="text/css" />)}
+</head>

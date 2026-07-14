@@ -1,0 +1,67 @@
+---
+import SiteHead from "../components/SiteHead.astro";
+import SiteNavigation from "../components/SiteNavigation.astro";
+
+interface Props {
+  title?: string;
+  description?: string;
+  activeNav?: "home" | "vacation-planner";
+  bodyClass?: string;
+  bodyId?: string;
+  mainClass?: string;
+  navClass?: string;
+  brandClass?: string;
+  linksClass?: string;
+  fontAwesome?: boolean;
+  stylesheet?: string;
+  script?: string;
+  scriptModule?: boolean;
+  plannerApiBase?: string;
+  lang?: string;
+}
+
+const {
+  title,
+  description,
+  activeNav,
+  bodyClass = "kc-page",
+  bodyId = "page-top",
+  mainClass = "kc-shell",
+  navClass,
+  brandClass,
+  linksClass,
+  fontAwesome = false,
+  stylesheet,
+  script,
+  scriptModule = false,
+  plannerApiBase,
+  lang = "en"
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang={lang}>
+  <SiteHead
+    title={title}
+    description={description}
+    fontAwesome={fontAwesome}
+    stylesheet={stylesheet}
+    plannerApiBase={plannerApiBase}
+  />
+
+  <body class={bodyClass} id={bodyId}>
+    <SiteNavigation
+      active={activeNav}
+      headerClass={navClass}
+      brandClass={brandClass}
+      linksClass={linksClass}
+    />
+
+    <main class={mainClass}>
+      <slot />
+    </main>
+
+    {script && scriptModule && <script is:inline type="module" src={script}></script>}
+    {script && !scriptModule && <script is:inline src={script}></script>}
+  </body>
+</html>

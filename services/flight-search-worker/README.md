@@ -10,7 +10,7 @@ npm install
 npm run dev
 ```
 
-The vacation planner page defaults to `http://127.0.0.1:8787` when it is running on `localhost` or `127.0.0.1`, so the local Jekyll page can call the Worker without extra configuration.
+The vacation planner page defaults to `http://127.0.0.1:8787` when it is running on `localhost` or `127.0.0.1`, so the local Astro page can call the Worker without extra configuration.
 
 ### Local SerpApi Smoke Test
 
