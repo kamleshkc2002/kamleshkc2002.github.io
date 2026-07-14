@@ -1,4 +1,6 @@
 _site
+dist/
+.astro/
 .idea/
 .sass-cache
 .jekyll-metadata

@@ -1,0 +1,22 @@
+---
+import SiteHead from "../components/SiteHead.astro";
+import SiteNavigation from "../components/SiteNavigation.astro";
+---
+
+<!doctype html>
+<html lang="en">
+  <SiteHead />
+
+  <body>
+    <div class="ambient-glow glow-1" aria-hidden="true"></div>
+    <div class="ambient-glow glow-2" aria-hidden="true"></div>
+
+    <div class="site-shell kc-shell">
+      <SiteNavigation showHome={false} />
+
+      <main>
+        <slot />
+      </main>
+    </div>
+  </body>
+</html>
