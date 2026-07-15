@@ -798,3 +798,105 @@
     margin-bottom: 14px;
   }
 }
+
+/* Refined application surfaces */
+.planner-kicker,
+.panel-kicker,
+.status-label {
+  letter-spacing: 0.08em;
+}
+
+.planner-toolbar h1 {
+  color: var(--kc-text-heading);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+}
+
+.status-strip,
+.planner-panel {
+  border-radius: var(--kc-card-border-radius);
+}
+
+.planner-panel {
+  box-shadow: var(--kc-card-shadow);
+}
+
+.planner-panel h2,
+.discovery-panel h3,
+.form-section-heading h3,
+.best-candidate h3 {
+  color: var(--kc-text-heading);
+  font-weight: 650;
+}
+
+.form-field label,
+.rule-fieldset legend {
+  font-weight: 650;
+}
+
+.form-field input,
+.form-field select,
+.form-field textarea,
+.compact-actions select,
+.check-row select {
+  border-radius: var(--kc-button-border-radius);
+  background: var(--kc-subtle-surface);
+}
+
+.form-field input:focus,
+.form-field select:focus,
+.form-field textarea:focus,
+.compact-actions select:focus,
+.check-row select:focus {
+  outline-offset: 1px;
+}
+
+.segmented-control {
+  border-radius: 9px;
+}
+
+.segmented-control span {
+  border-radius: 6px;
+  font-weight: 650;
+}
+
+.segmented-control input:checked + span {
+  background: var(--kc-control-surface);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.rule-pill {
+  border-radius: 6px;
+}
+
+.check-row,
+.notification-state,
+.alert-banner,
+.discovery-status {
+  border-radius: var(--kc-button-border-radius);
+}
+
+.recommendation-board,
+.discovery-panel {
+  border-radius: 9px;
+}
+
+.source-card {
+  border-radius: 7px;
+}
+
+.best-score {
+  border-radius: 8px;
+  background: var(--kc-accent);
+  color: #ffffff;
+}
+
+.candidate-item,
+.side-item {
+  border-radius: 8px;
+}
+
+.rule-result-list li,
+.tag {
+  border-radius: 5px;
+}
